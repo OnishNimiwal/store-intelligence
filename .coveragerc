@@ -1,0 +1,6 @@
+[run]
+omit =
+    app/dashboard.py
+    pipeline/*
+    scripts/*
+    tests/*

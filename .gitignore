@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+htmlcov/
+data/
+*.mp4
+*.db
+store_intelligence.db
+test_*.db
+events*.jsonl
+!scripts/fixtures/

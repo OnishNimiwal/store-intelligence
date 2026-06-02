@@ -1,0 +1,3 @@
+# Optional GPU pipeline dependencies (install for real YOLO processing)
+ultralytics>=8.0.0
+torch>=2.0.0

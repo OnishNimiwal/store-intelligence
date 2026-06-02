@@ -1,0 +1,38 @@
+# Never copy local venv into image (causes huge builds + I/O errors on Windows)
+.venv/
+venv/
+env/
+
+# Data and artifacts
+data/
+*.mp4
+*.db
+store_intelligence.db
+test_*.db
+events.jsonl
+sample_events.jsonl
+*.jsonl
+
+# Python / test / IDE
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.git/
+.gitignore
+.cursor/
+*.md
+!README.md
+
+# Env and OS
+.env
+.env.*
+.DS_Store
+Thumbs.db
+
+# Colab / uploads
+*.zip
+collab-upload/
