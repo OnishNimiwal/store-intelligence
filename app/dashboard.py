@@ -144,7 +144,26 @@ st.markdown(
 
 # Sidebar controls
 st.sidebar.markdown("### 🎛️ Store Control Panel")
-store_id = st.sidebar.selectbox("Active Store Location", ["STORE_BLR_002", "ST1008"], index=1)
+
+import json
+from pathlib import Path
+layout_path = Path("store_layout.json")
+store_options = []
+if layout_path.exists():
+    try:
+        with open(layout_path, encoding="utf-8") as h:
+            layout_data = json.load(h)
+            if isinstance(layout_data, list):
+                store_options = [store.get("store_id") for store in layout_data if store.get("store_id")]
+    except Exception:
+        pass
+if not store_options:
+    store_options = ["STORE_BLR_002", "ST1008", "store_1", "store_2"]
+
+# Ensure store_1 or STORE_BLR_002 is selected by default if available
+default_idx = store_options.index("store_1") if "store_1" in store_options else (store_options.index("STORE_BLR_002") if "STORE_BLR_002" in store_options else 0)
+
+store_id = st.sidebar.selectbox("Active Store Location", store_options, index=default_idx)
 auto_refresh = st.sidebar.checkbox("Live Refresh (3s)", value=True)
 
 st.sidebar.markdown("---")
