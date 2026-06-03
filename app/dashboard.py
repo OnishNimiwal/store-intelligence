@@ -147,13 +147,7 @@ st.sidebar.markdown("### 🎛️ Store Control Panel")
 
 # Limit options to exactly Store 1 and Store 2
 store_display_options = ["Store 1", "Store 2"]
-selected_display = st.sidebar.selectbox("Active Store Location", store_display_options, index=0)
-
-store_id_map = {
-    "Store 1": "ST1008",
-    "Store 2": "STORE_BLR_002"
-}
-store_id = store_id_map[selected_display]
+store_id = st.sidebar.selectbox("Active Store Location", store_display_options, index=0)
 auto_refresh = st.sidebar.checkbox("Live Refresh (3s)", value=True)
 
 st.sidebar.markdown("---")

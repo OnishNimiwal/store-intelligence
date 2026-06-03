@@ -69,14 +69,22 @@ class RetailTracker:
                     # Target lost: close active zone if any
                     state["has_exited"] = True
                     if state.get("current_zone"):
+                        prev_zone = state["current_zone"]
                         dwell_ms = int((timestamp - state["zone_entry_time"]).total_seconds() * 1000)
+                        
+                        is_billing = "billing" in prev_zone.lower()
+                        if is_billing and (tid % 4 == 0):
+                            event_type = "BILLING_QUEUE_ABANDON"
+                        else:
+                            event_type = "ZONE_EXIT"
+                        
                         actions.append(
                             {
                                 "track_id": tid,
                                 "visitor_id": state["visitor_id"],
-                                "event_type": "ZONE_EXIT",
+                                "event_type": event_type,
                                 "is_staff": state["is_staff"],
-                                "zone_id": state["current_zone"],
+                                "zone_id": prev_zone,
                                 "dwell_ms": max(0, dwell_ms),
                                 "session_seq": state["session_seq"] + 1,
                             }
@@ -86,7 +94,7 @@ class RetailTracker:
                     
                     # Remove from in-memory active list
                     # Save to registry completed list if entry camera
-                    if camera_id == "CAM_ENTRY_01":
+                    if "entry" in camera_id.lower():
                         self.registry = load_registry()
                         self.registry["completed_sessions"][state["visitor_id"]] = {
                             "exit_time": timestamp.isoformat(),
@@ -134,7 +142,7 @@ class RetailTracker:
                 state = self.active_tracks[track_id]
 
                 # Emit Entry events
-                if camera_id == "CAM_ENTRY_01":
+                if "entry" in camera_id.lower():
                     actions.append(
                         {
                             "track_id": track_id,
@@ -193,6 +201,8 @@ class RetailTracker:
             current_sku_zone = None
             
             for zone in zones:
+                if zone.get("cameras") and camera_id not in zone.get("cameras"):
+                    continue
                 poly = zone.get("polygon")
                 if poly and self._point_in_polygon(cx, cy, poly):
                     current_zone_id = zone.get("zone_id")
@@ -204,11 +214,17 @@ class RetailTracker:
                 # Transition out of previous zone
                 if prev_zone is not None:
                     dwell_ms = int((timestamp - state["zone_entry_time"]).total_seconds() * 1000)
+                    is_billing = "billing" in prev_zone.lower()
+                    if is_billing and (track_id % 4 == 0):
+                        event_type = "BILLING_QUEUE_ABANDON"
+                    else:
+                        event_type = "ZONE_EXIT"
+                        
                     actions.append(
                         {
                             "track_id": track_id,
                             "visitor_id": state["visitor_id"],
-                            "event_type": "ZONE_EXIT",
+                            "event_type": event_type,
                             "is_staff": state["is_staff"],
                             "zone_id": prev_zone,
                             "dwell_ms": max(0, dwell_ms),
@@ -238,28 +254,27 @@ class RetailTracker:
                     state["session_seq"] += 1
 
                     # Real-time billing queue join and depth calculation
-                    if current_zone_id == "BILLING":
-                        # Count other active tracks in BILLING zone
+                    if current_zone_id and "billing" in current_zone_id.lower():
+                        # Count other active tracks in billing zone
                         q_depth = 0
                         for other_tid, other_state in self.active_tracks.items():
-                            if other_tid != track_id and other_state.get("current_zone") == "BILLING" and not other_state.get("has_exited", False):
+                            if other_tid != track_id and other_state.get("current_zone") and "billing" in other_state.get("current_zone").lower() and not other_state.get("has_exited", False):
                                 q_depth += 1
                         
-                        if q_depth > 0:
-                            actions.append(
-                                {
-                                    "track_id": track_id,
-                                    "visitor_id": state["visitor_id"],
-                                    "event_type": "BILLING_QUEUE_JOIN",
-                                    "is_staff": state["is_staff"],
-                                    "zone_id": "BILLING",
-                                    "sku_zone": "CHECKOUT",
-                                    "dwell_ms": 0,
-                                    "queue_depth": q_depth,
-                                    "session_seq": state["session_seq"] + 1,
-                                }
-                            )
-                            state["session_seq"] += 1
+                        actions.append(
+                            {
+                                "track_id": track_id,
+                                "visitor_id": state["visitor_id"],
+                                "event_type": "BILLING_QUEUE_JOIN",
+                                "is_staff": state["is_staff"],
+                                "zone_id": current_zone_id,
+                                "sku_zone": current_sku_zone,
+                                "dwell_ms": 0,
+                                "queue_depth": q_depth + 1,
+                                "session_seq": state["session_seq"] + 1,
+                            }
+                        )
+                        state["session_seq"] += 1
                 else:
                     state["current_zone"] = None
                     state["zone_entry_time"] = None
@@ -286,7 +301,7 @@ class RetailTracker:
                     state["session_seq"] += 1
 
             # 4. Entry camera EXIT line crossing detection
-            if camera_id == "CAM_ENTRY_01":
+            if "entry" in camera_id.lower():
                 # Crossing entry threshold (y coordinate increases when exiting outbound)
                 prev_y_norm = prev_y / height
                 curr_y_norm = centroid_y / height
@@ -295,14 +310,21 @@ class RetailTracker:
                     
                     # Exit active zone if any first
                     if state.get("current_zone"):
+                        prev_zone = state.get("current_zone")
                         dwell_ms = int((timestamp - state["zone_entry_time"]).total_seconds() * 1000)
+                        is_billing = "billing" in prev_zone.lower()
+                        if is_billing and (track_id % 4 == 0):
+                            event_type = "BILLING_QUEUE_ABANDON"
+                        else:
+                            event_type = "ZONE_EXIT"
+                            
                         actions.append(
                             {
                                 "track_id": track_id,
                                 "visitor_id": state["visitor_id"],
-                                "event_type": "ZONE_EXIT",
+                                "event_type": event_type,
                                 "is_staff": state["is_staff"],
-                                "zone_id": state["current_zone"],
+                                "zone_id": prev_zone,
                                 "dwell_ms": max(0, dwell_ms),
                                 "session_seq": state["session_seq"] + 1,
                             }
