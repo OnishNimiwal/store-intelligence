@@ -1,5 +1,6 @@
 import logging
 import uuid
+from datetime import datetime
 from typing import Any, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -170,6 +171,46 @@ def ingest_events(payload: List[Dict[str, Any]], db: Session = Depends(get_db)):
     seen_event_ids: set[str] = set()
 
     for idx, raw_event in enumerate(normalized_payload):
+        if raw_event.get("event_type") == "ZONE_EXIT":
+            visitor_id = raw_event.get("visitor_id")
+            zone_id = raw_event.get("zone_id")
+            store_id = raw_event.get("store_id")
+            exit_ts_str = raw_event.get("timestamp")
+            
+            enter_ts_str = None
+            for prev_evt in reversed(normalized_payload[:idx]):
+                if (
+                    prev_evt.get("event_type") == "ZONE_ENTER"
+                    and prev_evt.get("visitor_id") == visitor_id
+                    and prev_evt.get("zone_id") == zone_id
+                    and prev_evt.get("store_id") == store_id
+                ):
+                    enter_ts_str = prev_evt.get("timestamp")
+                    break
+            
+            if not enter_ts_str:
+                last_enter = (
+                    db.query(DBEvent.timestamp)
+                    .filter(DBEvent.store_id == store_id)
+                    .filter(DBEvent.visitor_id == visitor_id)
+                    .filter(DBEvent.zone_id == zone_id)
+                    .filter(DBEvent.event_type == "ZONE_ENTER")
+                    .order_by(DBEvent.timestamp.desc())
+                    .first()
+                )
+                if last_enter:
+                    enter_ts_str = last_enter[0].isoformat()
+            
+            if enter_ts_str:
+                try:
+                    exit_ts = datetime.fromisoformat(exit_ts_str.replace("Z", "+00:00")).replace(tzinfo=None)
+                    enter_ts = datetime.fromisoformat(enter_ts_str.replace("Z", "+00:00")).replace(tzinfo=None)
+                    duration_sec = (exit_ts - enter_ts).total_seconds()
+                    if duration_sec > 0:
+                        raw_event["dwell_ms"] = int(duration_sec * 1000)
+                except Exception:
+                    pass
+
         try:
             validated = EventSchema(**raw_event)
             if validated.event_id in seen_event_ids:
