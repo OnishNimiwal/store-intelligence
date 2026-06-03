@@ -145,25 +145,15 @@ st.markdown(
 # Sidebar controls
 st.sidebar.markdown("### 🎛️ Store Control Panel")
 
-import json
-from pathlib import Path
-layout_path = Path("store_layout.json")
-store_options = []
-if layout_path.exists():
-    try:
-        with open(layout_path, encoding="utf-8") as h:
-            layout_data = json.load(h)
-            if isinstance(layout_data, list):
-                store_options = [store.get("store_id") for store in layout_data if store.get("store_id")]
-    except Exception:
-        pass
-if not store_options:
-    store_options = ["STORE_BLR_002", "ST1008", "store_1", "store_2"]
+# Limit options to exactly Store 1 and Store 2
+store_display_options = ["Store 1", "Store 2"]
+selected_display = st.sidebar.selectbox("Active Store Location", store_display_options, index=0)
 
-# Ensure store_1 or STORE_BLR_002 is selected by default if available
-default_idx = store_options.index("store_1") if "store_1" in store_options else (store_options.index("STORE_BLR_002") if "STORE_BLR_002" in store_options else 0)
-
-store_id = st.sidebar.selectbox("Active Store Location", store_options, index=default_idx)
+store_id_map = {
+    "Store 1": "ST1008",
+    "Store 2": "STORE_BLR_002"
+}
+store_id = store_id_map[selected_display]
 auto_refresh = st.sidebar.checkbox("Live Refresh (3s)", value=True)
 
 st.sidebar.markdown("---")
@@ -228,6 +218,11 @@ try:
     heatmap = requests.get(f"{API_URL}/stores/{store_id}/heatmap", timeout=5).json()
     anomalies = requests.get(f"{API_URL}/stores/{store_id}/anomalies", timeout=5).json()
     health = requests.get(f"{API_URL}/health", timeout=5).json()
+    
+    # Retrieve raw event stream and linked sales data
+    raw_events = requests.get(f"{API_URL}/stores/{store_id}/raw-events", timeout=5).json()
+    linked_conversions = requests.get(f"{API_URL}/stores/{store_id}/linked-conversions", timeout=5).json()
+    
     connected = True
 except Exception:
     connected = False
@@ -294,14 +289,14 @@ if connected:
             formatted_funnel = funnel_df.copy()
             formatted_funnel["drop_off_pct"] = formatted_funnel["drop_off_pct"].apply(lambda val: f"{val:.1f}% Drop-off")
             formatted_funnel.columns = ["Funnel Stage", "Unique Visitors Count", "Drop-off Rate"]
-            st.dataframe(formatted_funnel, use_container_width=True, hide_index=True)
+            st.dataframe(formatted_funnel, width="stretch", hide_index=True)
             
             # Simple custom bar graph for funnel
             st.bar_chart(
                 data=funnel_df,
                 x="stage_name",
                 y="count",
-                use_container_width=True,
+                width="stretch",
             )
         else:
             st.info("No active funnel data available.")
@@ -324,13 +319,73 @@ if connected:
             # Structured details
             formatted_heatmap = df_heatmap.copy()
             formatted_heatmap.columns = ["Zone", "Total Visits", "Avg Dwell (sec)", "Normalized Score"]
-            st.dataframe(formatted_heatmap, use_container_width=True, hide_index=True)
+            st.dataframe(formatted_heatmap, width="stretch", hide_index=True)
         else:
             st.info("No active heatmap data captured yet.")
 
     st.markdown("---")
 
-    # 6. Operational Anomalies Section
+    # 6. Deep Data Inspection & Association
+    st.subheader("🔍 Deep Data Inspection & Association")
+    
+    tab_events, tab_conversions = st.tabs(["📋 Raw Event Stream", "🔗 POS Conversion Association"])
+    
+    with tab_events:
+        st.markdown("This tab displays all camera events ingested into the store database, including their camera origin, visitor ID tracking token, confidence score, and timestamps.")
+        if raw_events:
+            df_ev = pd.DataFrame(raw_events)
+            df_ev["dwell_sec"] = df_ev["dwell_ms"] / 1000.0
+            
+            df_ev_display = df_ev[[
+                "timestamp", "visitor_id", "event_type", "zone_id", "sku_zone", 
+                "dwell_sec", "confidence", "is_staff", "camera_id"
+            ]].copy()
+            df_ev_display.columns = [
+                "Timestamp", "Visitor ID", "Event Type", "Zone ID", "SKU Zone",
+                "Dwell (sec)", "Confidence", "Is Staff?", "Camera ID"
+            ]
+            st.dataframe(df_ev_display, width="stretch", hide_index=True)
+        else:
+            st.info("No raw events found for this store location.")
+
+    with tab_conversions:
+        st.markdown("This tab maps POS transactions directly to visitor sessions detected in the billing zone (`zone_id` = `BILLING` or `Billing Counter Queue`) during the 5-minute window preceding each sale timestamp.")
+        if linked_conversions:
+            df_lc = pd.DataFrame(linked_conversions)
+            df_lc_display = df_lc[[
+                "transaction_index", "timestamp", "basket_value", 
+                "converted_visitors_count", "converted_visitor_ids"
+            ]].copy()
+            df_lc_display.columns = [
+                "Transaction #", "Sale Timestamp", "Basket Value (INR)", 
+                "Matched Sessions Count", "Correlated Session IDs"
+            ]
+            st.dataframe(df_lc_display, width="stretch", hide_index=True)
+            
+            # Interactive explorer
+            st.markdown("### 🕵️ Transaction-level Visitor Presence Inspector")
+            tx_options = [f"Transaction #{item['transaction_index']} at {item['timestamp']}" for item in linked_conversions]
+            selected_tx = st.selectbox("Select Transaction to Inspect", tx_options)
+            if selected_tx:
+                tx_idx = int(selected_tx.split("#")[1].split(" ")[0]) - 1
+                selected_txn_data = linked_conversions[tx_idx]
+                
+                st.write(f"**Transaction Value:** {selected_txn_data['basket_value']} INR")
+                st.write(f"**Matched Billing Sessions:** {selected_txn_data['converted_visitors_count']}")
+                
+                presence_list = selected_txn_data['matching_billing_presence']
+                if presence_list:
+                    df_pres = pd.DataFrame(presence_list)
+                    df_pres.columns = ["Visitor Session ID", "Billing Presence Timestamp", "Event Type"]
+                    st.dataframe(df_pres, width="stretch", hide_index=True)
+                else:
+                    st.warning("No visitor presence detected in the billing zone during the 5-minute window before this transaction.")
+        else:
+            st.info("No POS transactions or linked conversions found for this store location.")
+
+    st.markdown("---")
+
+    # 7. Operational Anomalies Section
     st.subheader("🚨 Active Operational Anomalies")
     active_anomalies = anomalies.get("anomalies", [])
     if active_anomalies:
@@ -361,7 +416,7 @@ if connected:
     else:
         st.success("✅ Operational Status: Excellent. No anomalies detected in the store pipeline.")
 
-    # 7. Systems & Pipelines Feed Health
+    # 8. Systems & Pipelines Feed Health
     st.markdown("<br>", unsafe_allow_html=True)
     st.subheader("🔌 IoT Feed & System Health")
     

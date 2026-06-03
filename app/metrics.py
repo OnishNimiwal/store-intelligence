@@ -189,3 +189,73 @@ def get_store_metrics(store_id: str, db: Session = Depends(get_db)):
         current_queue_depth=current_queue_depth,
         abandonment_rate=round(abandonment_rate, 4),
     )
+
+
+@router.get("/{store_id}/raw-events")
+def get_raw_events(store_id: str, db: Session = Depends(get_db)):
+    events = (
+        db.query(DBEvent)
+        .filter(DBEvent.store_id == store_id)
+        .order_by(DBEvent.timestamp.asc())
+        .all()
+    )
+    return [
+        {
+            "event_id": e.event_id,
+            "store_id": e.store_id,
+            "camera_id": e.camera_id,
+            "visitor_id": e.visitor_id,
+            "event_type": e.event_type,
+            "timestamp": e.timestamp.isoformat() if e.timestamp else None,
+            "zone_id": e.zone_id,
+            "dwell_ms": e.dwell_ms,
+            "is_staff": e.is_staff,
+            "confidence": e.confidence,
+            "queue_depth": e.queue_depth,
+            "sku_zone": e.sku_zone,
+            "session_seq": e.session_seq,
+        }
+        for e in events
+    ]
+
+
+@router.get("/{store_id}/linked-conversions")
+def get_linked_conversions(store_id: str, db: Session = Depends(get_db)):
+    transactions = load_pos_transactions(store_id)
+    if not transactions:
+        return []
+    
+    billing_events = (
+        db.query(DBEvent.visitor_id, DBEvent.timestamp, DBEvent.event_type)
+        .filter(DBEvent.store_id == store_id)
+        .filter(DBEvent.is_staff == False)
+        .filter(DBEvent.zone_id.in_(["BILLING", "Billing Counter Queue"]))
+        .all()
+    )
+    
+    linked = []
+    for idx, txn in enumerate(transactions):
+        txn_time = txn["timestamp"]
+        window_start = txn_time - timedelta(minutes=5)
+        converted_visitors = set()
+        matching_events = []
+        
+        for visitor_id, event_time, event_type in billing_events:
+            event_naive = event_time.replace(tzinfo=None) if event_time.tzinfo else event_time
+            if window_start <= event_naive <= txn_time:
+                converted_visitors.add(visitor_id)
+                matching_events.append({
+                    "visitor_id": visitor_id,
+                    "event_time": event_naive.isoformat(),
+                    "event_type": event_type,
+                })
+                
+        linked.append({
+            "transaction_index": idx + 1,
+            "timestamp": txn_time.isoformat(),
+            "basket_value": txn["basket_value"],
+            "converted_visitors_count": len(converted_visitors),
+            "converted_visitor_ids": list(converted_visitors),
+            "matching_billing_presence": matching_events,
+        })
+    return linked
