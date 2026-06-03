@@ -81,3 +81,29 @@ def test_format2_normalization(client):
     assert len(body["errors"]) == 0
     assert body["success"] is True
 
+
+def test_ingest_idempotency(client):
+    payload = [
+        {
+            "event_id": "idemp-1",
+            "store_id": "STORE_BLR_002",
+            "camera_id": "CAM_ENTRY_01",
+            "visitor_id": "VIS_IDEMP_01",
+            "event_type": "ENTRY",
+            "timestamp": "2026-03-03T14:00:00Z",
+            "confidence": 0.9,
+        }
+    ]
+    # First ingest
+    res1 = client.post("/events/ingest", json=payload)
+    assert res1.status_code == 201
+    assert res1.json()["ingested_count"] == 1
+    assert res1.json()["success"] is True
+
+    # Second identical ingest
+    res2 = client.post("/events/ingest", json=payload)
+    assert res2.status_code == 201
+    assert res2.json()["ingested_count"] == 1
+    assert res2.json()["success"] is True
+
+
