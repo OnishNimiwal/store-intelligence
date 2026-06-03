@@ -332,7 +332,7 @@ if connected:
     
     with tab_events:
         st.markdown("This tab displays all camera events ingested into the store database, including their camera origin, visitor ID tracking token, confidence score, and timestamps.")
-        if raw_events:
+        if raw_events and isinstance(raw_events, list):
             df_ev = pd.DataFrame(raw_events)
             df_ev["dwell_sec"] = df_ev["dwell_ms"] / 1000.0
             
@@ -350,7 +350,7 @@ if connected:
 
     with tab_conversions:
         st.markdown("This tab maps POS transactions directly to visitor sessions detected in the billing zone (`zone_id` = `BILLING` or `Billing Counter Queue`) during the 5-minute window preceding each sale timestamp.")
-        if linked_conversions:
+        if linked_conversions and isinstance(linked_conversions, list):
             df_lc = pd.DataFrame(linked_conversions)
             df_lc_display = df_lc[[
                 "transaction_index", "timestamp", "basket_value", 
