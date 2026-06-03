@@ -94,7 +94,7 @@ def _converted_visitors(db: Session, store_id: str, transactions: List[Dict]) ->
         db.query(DBEvent.visitor_id, DBEvent.timestamp)
         .filter(DBEvent.store_id == store_id)
         .filter(DBEvent.is_staff == False)
-        .filter(DBEvent.zone_id == "BILLING")
+        .filter(DBEvent.zone_id.in_(["BILLING", "Billing Counter Queue"]))
         .all()
     )
     for txn in transactions:

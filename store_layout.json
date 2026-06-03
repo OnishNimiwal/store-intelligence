@@ -3,62 +3,28 @@
     "store_id": "STORE_BLR_002",
     "open_hours": {"start": "10:00", "end": "22:00"},
     "cameras": [
-      {"camera_id": "CAM_ENTRY_01", "role": "entry_exit"},
-      {"camera_id": "CAM_FLOOR_02", "role": "floor"},
-      {"camera_id": "CAM_BILLING_03", "role": "billing"}
+      {"camera_id": "entry 1", "role": "entry_exit"},
+      {"camera_id": "entry 2", "role": "entry_exit"},
+      {"camera_id": "zone", "role": "floor"},
+      {"camera_id": "billing_area", "role": "billing"}
     ],
     "zones": [
       {
-        "zone_id": "SKINCARE",
-        "polygon": [[0.1, 0.1], [0.5, 0.1], [0.5, 0.5], [0.1, 0.5]],
-        "sku_zone": "MOISTURISER",
-        "cameras": ["CAM_FLOOR_02"]
+        "zone_id": "Main Floor Aisle",
+        "polygon": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
+        "sku_zone": "Main Floor Aisle",
+        "cameras": ["zone"]
       },
       {
-        "zone_id": "COSMETICS",
-        "polygon": [[0.5, 0.1], [0.9, 0.1], [0.9, 0.5], [0.5, 0.5]],
-        "sku_zone": "LIPSTICK",
-        "cameras": ["CAM_FLOOR_02"]
-      },
-      {
-        "zone_id": "BILLING",
-        "polygon": [[0.2, 0.6], [0.8, 0.6], [0.8, 0.9], [0.2, 0.9]],
-        "sku_zone": "CHECKOUT",
-        "cameras": ["CAM_BILLING_03"]
+        "zone_id": "Billing Counter Queue",
+        "polygon": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
+        "sku_zone": "Billing Counter Queue",
+        "cameras": ["billing_area"]
       }
     ]
   },
   {
     "store_id": "ST1008",
-    "open_hours": {"start": "10:00", "end": "22:00"},
-    "cameras": [
-      {"camera_id": "CAM_ENTRY_01", "role": "entry_exit"},
-      {"camera_id": "CAM_FLOOR_02", "role": "floor"},
-      {"camera_id": "CAM_BILLING_03", "role": "billing"}
-    ],
-    "zones": [
-      {
-        "zone_id": "SKINCARE",
-        "polygon": [[0.1, 0.1], [0.5, 0.1], [0.5, 0.5], [0.1, 0.5]],
-        "sku_zone": "MOISTURISER",
-        "cameras": ["CAM_FLOOR_02"]
-      },
-      {
-        "zone_id": "COSMETICS",
-        "polygon": [[0.5, 0.1], [0.9, 0.1], [0.9, 0.5], [0.5, 0.5]],
-        "sku_zone": "LIPSTICK",
-        "cameras": ["CAM_FLOOR_02"]
-      },
-      {
-        "zone_id": "BILLING",
-        "polygon": [[0.2, 0.6], [0.8, 0.6], [0.8, 0.9], [0.2, 0.9]],
-        "sku_zone": "CHECKOUT",
-        "cameras": ["CAM_BILLING_03"]
-      }
-    ]
-  },
-  {
-    "store_id": "store_1",
     "open_hours": {"start": "10:00", "end": "22:00"},
     "cameras": [
       {"camera_id": "CAM 3 - entry", "role": "entry_exit"},
@@ -84,30 +50,6 @@
         "polygon": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
         "sku_zone": "Billing Counter Queue",
         "cameras": ["CAM 5 - billing"]
-      }
-    ]
-  },
-  {
-    "store_id": "store_2",
-    "open_hours": {"start": "10:00", "end": "22:00"},
-    "cameras": [
-      {"camera_id": "entry 1", "role": "entry_exit"},
-      {"camera_id": "entry 2", "role": "entry_exit"},
-      {"camera_id": "zone", "role": "floor"},
-      {"camera_id": "billing_area", "role": "billing"}
-    ],
-    "zones": [
-      {
-        "zone_id": "Main Floor Aisle",
-        "polygon": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-        "sku_zone": "Main Floor Aisle",
-        "cameras": ["zone"]
-      },
-      {
-        "zone_id": "Billing Counter Queue",
-        "polygon": [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]],
-        "sku_zone": "Billing Counter Queue",
-        "cameras": ["billing_area"]
       }
     ]
   }

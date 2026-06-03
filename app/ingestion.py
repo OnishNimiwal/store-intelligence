@@ -24,7 +24,7 @@ def normalize_raw_event(raw: dict) -> List[dict]:
     if not event_type:
         return [raw]
 
-    if event_type in ("entry", "exit"):
+    if event_type in ("entry", "exit", "reentry"):
         id_token = raw.get("id_token")
         store_code = raw.get("store_code") or raw.get("store_id")
         camera_id = raw.get("camera_id")
@@ -46,9 +46,9 @@ def normalize_raw_event(raw: dict) -> List[dict]:
                 "zone_id": None,
                 "dwell_ms": 0,
                 "is_staff": is_staff,
-                "confidence": 1.0,
+                "confidence": raw.get("confidence", 1.0),
                 "metadata": {
-                    "session_seq": 1 if event_type == "entry" else 999,
+                    "session_seq": 1 if event_type == "entry" else (2 if event_type == "reentry" else 999),
                     "sku_zone": None,
                     "queue_depth": None,
                 },
@@ -79,7 +79,7 @@ def normalize_raw_event(raw: dict) -> List[dict]:
                 "zone_id": zone_id,
                 "dwell_ms": 0,
                 "is_staff": False,
-                "confidence": 1.0,
+                "confidence": raw.get("confidence", 1.0),
                 "metadata": {
                     "sku_zone": zone_name,
                     "session_seq": None,
@@ -116,7 +116,7 @@ def normalize_raw_event(raw: dict) -> List[dict]:
                 "zone_id": "BILLING",
                 "dwell_ms": 0,
                 "is_staff": False,
-                "confidence": 1.0,
+                "confidence": raw.get("confidence", 1.0),
                 "metadata": {
                     "queue_depth": queue_position,
                     "sku_zone": zone_name,
@@ -138,7 +138,7 @@ def normalize_raw_event(raw: dict) -> List[dict]:
                 "zone_id": "BILLING",
                 "dwell_ms": int(wait_seconds * 1000) if wait_seconds else 0,
                 "is_staff": False,
-                "confidence": 1.0,
+                "confidence": raw.get("confidence", 1.0),
                 "metadata": {
                     "queue_depth": None,
                     "sku_zone": zone_name,
