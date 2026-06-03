@@ -226,8 +226,15 @@ def process_store_clips(store_id: str, store_folder: Path):
         
         print(f"     Duration: {duration_sec:.1f}s, Frames: {frame_count}")
         
-        # Set camera ID from name
+        # Set camera ID and map them to layouts for Store 2 since we use Store 1 clips
         camera_id = clip.stem
+        if store_id == "STORE_BLR_002":
+            if "entry" in clip_name:
+                camera_id = "entry 1"
+            elif "zone" in clip_name:
+                camera_id = "zone"
+            elif "billing" in clip_name:
+                camera_id = "billing_area"
         
         # Rule-based behavior simulation to generate clean event patterns
         # entries/exits
@@ -418,12 +425,12 @@ def process_store_clips(store_id: str, store_folder: Path):
 if OUTPUT_PATH.exists():
     OUTPUT_PATH.unlink()
 
-# Process Store 1
+# Process Store 1 (using Store 1's folder)
 store1_dir = DATA_PATH / "Store 1-20260602T101818Z-3-001ec38db8" / "Store 1"
 process_store_clips("ST1008", store1_dir)
 
-# Process Store 2
-store2_dir = DATA_PATH / "Store 2-20260602T101819Z-3-001099f208" / "Store 2"
+# Process Store 2 (ALSO using Store 1's folder as requested)
+store2_dir = DATA_PATH / "Store 1-20260602T101818Z-3-001ec38db8" / "Store 1"
 process_store_clips("STORE_BLR_002", store2_dir)
 
 print("\n[*] All camera files processed successfully. Output events.jsonl is ready for ingestion!")
