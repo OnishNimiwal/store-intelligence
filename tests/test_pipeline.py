@@ -20,7 +20,7 @@ CATALOGUE = [
 def test_event_schema_validation_happy_path():
     raw = {
         "event_id": "8905b221-a0a3-48df-b4a1-db9b015175e1",
-        "store_id": "STORE_BLR_002",
+        "store_id": "Store 2",
         "camera_id": "CAM_ENTRY_01",
         "visitor_id": "VIS_c8a2f1",
         "event_type": "ZONE_DWELL",
@@ -39,7 +39,7 @@ def test_event_schema_validation_happy_path():
 def test_event_schema_validation_invalid_type():
     invalid = {
         "event_id": "8905b221-a0a3-48df-b4a1-db9b015175e1",
-        "store_id": "STORE_BLR_002",
+        "store_id": "Store 2",
         "camera_id": "CAM_ENTRY_01",
         "visitor_id": "VIS_c8a2f1",
         "event_type": "ZONE_DWELL",
@@ -55,7 +55,7 @@ def test_event_schema_validation_invalid_type():
 def test_staff_flag_propagation():
     raw = {
         "event_id": "a189fcd2-a0e1-4cbb-a309-fa938e21a8d0",
-        "store_id": "STORE_BLR_002",
+        "store_id": "Store 2",
         "camera_id": "CAM_FLOOR_02",
         "visitor_id": "VIS_staff_01",
         "event_type": "ZONE_ENTER",

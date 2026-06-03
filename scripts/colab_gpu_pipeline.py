@@ -501,7 +501,7 @@ def main():
     store2_dir = find_store_folder(dataset_path, "Store 2", store2_fallback)
 
     store_layouts = {
-        "ST1008": {
+        "Store 1": {
             "base_time": datetime(2026, 6, 2, 10, 18, 18),
             "folder": store1_dir,
             "clips": [
@@ -531,7 +531,7 @@ def main():
                 }
             ]
         },
-        "STORE_BLR_002": {
+        "Store 2": {
             "base_time": datetime(2026, 6, 2, 10, 18, 19),
             "folder": store2_dir,
             "clips": [

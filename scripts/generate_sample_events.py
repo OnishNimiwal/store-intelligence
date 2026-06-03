@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
 
-STORE_ID = "STORE_BLR_002"
+STORE_ID = "Store 2"
 OUTPUT = Path(__file__).resolve().parent.parent / "sample_events.jsonl"
 EVENT_TYPES = [
     "ENTRY",

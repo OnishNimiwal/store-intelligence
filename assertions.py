@@ -8,7 +8,7 @@ import sys
 import requests
 
 API_URL = os.getenv("API_URL", "http://localhost:8000")
-STORE_ID = "STORE_BLR_002"
+STORE_ID = "Store 2"
 passed = 0
 failed = 0
 

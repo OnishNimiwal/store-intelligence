@@ -6,7 +6,7 @@ Set-Location $Root
 $DatasetRoot = if ($env:DATASET_ROOT) { $env:DATASET_ROOT } else { "C:\Users\NIKKA\Desktop\apex-retail-dataset" }
 $Layout = if ($env:STORE_LAYOUT_PATH) { $env:STORE_LAYOUT_PATH } else { Join-Path $Root "store_layout.json" }
 $Out = Join-Path $Root "data\out\events.jsonl"
-$StoreId = "STORE_BLR_002"
+$StoreId = "Store 2"
 $ClipStart = "2026-03-03T14:00:00Z"
 $MaxFrames = if ($env:PIPELINE_MAX_FRAMES) { [int]$env:PIPELINE_MAX_FRAMES } else { 0 }
 $FrameSkip = if ($env:PIPELINE_FRAME_SKIP) { [int]$env:PIPELINE_FRAME_SKIP } else { 3 }

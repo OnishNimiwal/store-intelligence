@@ -17,7 +17,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Store Intelligence detection pipeline")
     parser.add_argument("--video", type=str, help="Path to CCTV clip (.mp4)")
     parser.add_argument("--store-layout", type=str, default="store_layout.json")
-    parser.add_argument("--store-id", type=str, default="STORE_BLR_002")
+    parser.add_argument("--store-id", type=str, default="Store 2")
     parser.add_argument("--camera-id", type=str, default="CAM_ENTRY_01")
     parser.add_argument("--output", type=str, default="data/out/events.jsonl")
     parser.add_argument("--clip-start", type=str, default="2026-03-03T14:00:00Z")

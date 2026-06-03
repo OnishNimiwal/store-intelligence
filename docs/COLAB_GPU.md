@@ -203,7 +203,7 @@ for fname, camera in CLIPS:
         sys.executable, "-m", "pipeline.detect",
         "--video", video,
         "--store-layout", LAYOUT,
-        "--store-id", "STORE_BLR_002",
+        "--store-id", "Store 2",
         "--camera-id", camera,
         "--clip-start", "2026-03-03T14:00:00Z",
         "--output", OUT,
@@ -248,7 +248,7 @@ cd C:\Users\NIKKA\OneDrive\Desktop\store-intelligence
 .\.venv\Scripts\Activate.ps1
 # API running (Docker or uvicorn)
 python scripts\ingest_file.py data\out\events.jsonl
-curl.exe http://localhost:8000/stores/STORE_BLR_002/metrics
+curl.exe http://localhost:8000/stores/"Store 2"/metrics
 ```
 
 ---

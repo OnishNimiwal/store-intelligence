@@ -5,7 +5,7 @@ def test_batch_size_limit(client):
     payload = [
         {
             "event_id": f"evt_{i}",
-            "store_id": "STORE_BLR_002",
+            "store_id": "Store 2",
             "camera_id": "CAM_ENTRY_01",
             "visitor_id": f"VIS_{i}",
             "event_type": "ENTRY",
@@ -86,7 +86,7 @@ def test_ingest_idempotency(client):
     payload = [
         {
             "event_id": "idemp-1",
-            "store_id": "STORE_BLR_002",
+            "store_id": "Store 2",
             "camera_id": "CAM_ENTRY_01",
             "visitor_id": "VIS_IDEMP_01",
             "event_type": "ENTRY",

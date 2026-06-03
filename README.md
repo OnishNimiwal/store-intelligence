@@ -36,7 +36,7 @@ In another terminal:
 ```bash
 python scripts/generate_sample_events.py
 python scripts/ingest_file.py sample_events.jsonl
-curl http://localhost:8000/stores/STORE_BLR_002/metrics
+curl http://localhost:8000/stores/"Store 2"/metrics
 ```
 
 ## Detection pipeline
@@ -80,7 +80,7 @@ python scripts/ingest_file.py data/out/events.jsonl
 With real video:
 
 ```bash
-python -m pipeline.detect --video path/to/clip.mp4 --store-id STORE_BLR_002 --camera-id CAM_ENTRY_01 --output data/out/events.jsonl
+python -m pipeline.detect --video path/to/clip.mp4 --store-id "Store 2" --camera-id CAM_ENTRY_01 --output data/out/events.jsonl
 ```
 
 ## Live dashboard (Part E bonus)
