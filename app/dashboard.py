@@ -145,8 +145,8 @@ st.markdown(
 # Sidebar controls
 st.sidebar.markdown("### 🎛️ Store Control Panel")
 
-# Limit options to exactly Store 1 and Store 2
-store_display_options = ["Store 1", "Store 2"]
+# Limit options to exactly ST1008 and STORE_BLR_002
+store_display_options = ["ST1008", "STORE_BLR_002"]
 store_id = st.sidebar.selectbox("Active Store Location", store_display_options, index=0)
 auto_refresh = st.sidebar.checkbox("Live Refresh (3s)", value=True)
 

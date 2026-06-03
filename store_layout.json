@@ -1,6 +1,6 @@
 [
   {
-    "store_id": "Store 2",
+    "store_id": "STORE_BLR_002",
     "open_hours": {"start": "10:00", "end": "22:00"},
     "cameras": [
       {"camera_id": "entry 1", "role": "entry_exit"},
@@ -24,7 +24,7 @@
     ]
   },
   {
-    "store_id": "Store 1",
+    "store_id": "ST1008",
     "open_hours": {"start": "10:00", "end": "22:00"},
     "cameras": [
       {"camera_id": "CAM 3 - entry", "role": "entry_exit"},

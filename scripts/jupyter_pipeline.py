@@ -55,7 +55,7 @@ def process_cctv_clips():
     # Store configurations
     stores = [
         {
-            "id": "Store 1",
+            "id": "ST1008",
             "folder": DATA_PATH / "Store 1-20260602T101818Z-3-001ec38db8" / "Store 1",
             "base_time": datetime(2026, 6, 2, 10, 18, 18),
             "clips": [
@@ -66,7 +66,7 @@ def process_cctv_clips():
             ]
         },
         {
-            "id": "Store 2",
+            "id": "STORE_BLR_002",
             "folder": DATA_PATH / "Store 2-20260602T101819Z-3-001099f208" / "Store 2",
             "base_time": datetime(2026, 6, 2, 10, 18, 19),
             "clips": [
