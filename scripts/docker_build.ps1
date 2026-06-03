@@ -16,7 +16,7 @@ Push-Location $BuildDir
 try {
     Write-Host "Building images..."
     docker compose down 2>$null
-    docker compose build --no-cache api
+    docker compose build api
     docker compose up -d api
     docker compose up -d dashboard
     Write-Host ""

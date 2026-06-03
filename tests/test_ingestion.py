@@ -37,3 +37,47 @@ def test_partial_success_on_malformed(client):
     assert body["ingested_count"] == 1
     assert len(body["errors"]) == 1
     assert body["success"] is False
+
+
+def test_format2_normalization(client):
+    payload = [
+        {
+            "event_type": "entry",
+            "id_token": "ID_99001",
+            "store_code": "store_1076",
+            "camera_id": "cam1",
+            "event_timestamp": "2026-03-08T18:10:05.120000",
+            "is_staff": False,
+        },
+        {
+            "event_type": "zone_entered",
+            "track_id": 901,
+            "store_id": "ST1076",
+            "camera_id": "CAM2",
+            "zone_id": "PURPLLE_MUM_1076_Z01",
+            "zone_name": "Left Shelf",
+            "event_time": "2026-03-08T18:10:45.280000",
+        },
+        {
+            "event_type": "queue_completed",
+            "track_id": 902,
+            "store_id": "ST1076",
+            "camera_id": "PURPLLE_MUM_1076_CAM6",
+            "zone_id": "PURPLLE_MUM_1076_Z_BILLING_01",
+            "zone_name": "Billing Counter Queue",
+            "queue_join_ts": "2026-03-08T18:13:05",
+            "queue_exit_ts": "2026-03-08T18:15:31",
+            "wait_seconds": 146,
+            "queue_position_at_join": 2,
+            "abandoned": False,
+        }
+    ]
+    res = client.post("/events/ingest", json=payload)
+    assert res.status_code == 201
+    body = res.json()
+    # The third event (queue_completed) normalizes into 2 separate events: join and exit
+    # So total ingested count should be 1 (entry) + 1 (zone_entered) + 2 (queue completed: join + exit) = 4 events!
+    assert body["ingested_count"] == 4
+    assert len(body["errors"]) == 0
+    assert body["success"] is True
+

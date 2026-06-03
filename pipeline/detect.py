@@ -25,6 +25,7 @@ def parse_args():
     parser.add_argument("--append", action="store_true", help="Append to output JSONL instead of overwriting")
     parser.add_argument("--max-frames", type=int, default=0, help="Stop after N frames (0 = full clip)")
     parser.add_argument("--frame-skip", type=int, default=2, help="Process every Nth frame")
+    parser.add_argument("--format", type=str, choices=["format1", "format2"], default="format2", help="Event schema format")
     return parser.parse_args()
 
 
@@ -194,7 +195,7 @@ def main():
     if not args.append and Path(args.output).exists():
         Path(args.output).unlink()
 
-    emitter = EventEmitter(store_id=args.store_id)
+    emitter = EventEmitter(store_id=args.store_id, schema_format=args.format)
     tracker = RetailTracker(entry_line_y=0.85)
     layout = load_layout(args.store_layout, args.store_id)
     zones = layout.get("zones", [])
